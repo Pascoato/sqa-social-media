@@ -45,9 +45,7 @@ test.describe('API - autenticacao', () => {
     expect(resposta.status()).toBe(409); // 409 = conflito (ja existe)
     const corpo = await resposta.json();
     expect(corpo.status).toBe(409);
-    // So conferimos que existe uma mensagem. O texto do backend ("E-mail ja esta em uso")
-    // e diferente do requisito ("E-mail ja cadastrado"); esse e o bug da Atividade 2.
-    expect(corpo.message).toBeTruthy();
+    expect(corpo.message).toBe('E-mail já cadastrado');
   });
 
   // Requisito coberto: login com e-mail e senha corretos

@@ -25,8 +25,8 @@ class AuthControllerMockMvcTest {
   @MockBean
   private UserService userService;
 
-  // BUG: o controller devolve "E-mail já está em uso",
-  // mas o requisito pede "E-mail já cadastrado". Este teste FALHA de proposito.
+  // O requisito pede a mensagem "E-mail já cadastrado". O controller devolvia
+  // "E-mail já está em uso".
   @Test
   void signupComEmailRepetidoDeveRetornar409() throws Exception {
     // Arrange: o service diz que o e-mail e a senha sao validos e que o e-mail ja existe
