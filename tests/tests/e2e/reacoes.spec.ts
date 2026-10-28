@@ -9,7 +9,7 @@ test.describe('E2E - likes e dislikes', () => {
     await expect(primeiroPost).toBeVisible({ timeout: 15000 });
 
     // Os contadores aparecem como "👍 192" e "👎 25" (numero depois do emoji)
-    await expect(primeiroPost.getByLabel('Likes')).toHaveText(/\d+/);
-    await expect(primeiroPost.getByLabel('Dislikes')).toHaveText(/\d+/);
+    await expect(primeiroPost.getByLabel('Likes', { exact: true })).toHaveText(/\d+/);
+    await expect(primeiroPost.getByLabel('Dislikes', { exact: true })).toHaveText(/\d+/);
   });
 });
