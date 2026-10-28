@@ -2,8 +2,8 @@ import { isPasswordValid } from "./password";
 
 describe("isPasswordValid", () => {
   // Cada linha da tabela e um caso: [descricao, senha, resultado esperado]
-  // O caso de 8 caracteres FALHA de proposito: o codigo usa "length <= 8"
-  // e o requisito diz "minimo 8 caracteres" (BUG).
+  // O caso de 8 caracteres (exatamente o minimo) pega o bug que existia no limite:
+  // o codigo usava "length <= 8" e o requisito diz "minimo 8 caracteres".
   const casos: [string, string, boolean][] = [
     ["7 caracteres (abaixo do minimo)", "Abcd12!", false],
     ["8 caracteres (exatamente o minimo)", "Abcd12!?", true],
