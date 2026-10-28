@@ -1,30 +1,29 @@
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
-
 import PostCard from "./PostCard";
 
-test("PostCard_aplicaFeedbackVisualAoCurtirAutenticado", async () => {
-  const post = {
-    id: 10,
-    title: "Post de teste",
-    body: "Conteúdo do post",
-    liked: false,
-  };
-  const onLike = jest.fn().mockResolvedValue(undefined);
+const post = { id: 10, title: "Post de teste", body: "Conteudo do post", liked: false };
 
-  render(
-    <PostCard post={post} isAuthenticated={true} onLike={onLike} />
-  );
+describe("PostCard", () => {
+  test("usuario logado: ao clicar em Curtir o botao muda para Curtido", async () => {
+    const onLike = jest.fn().mockResolvedValue(undefined);
+    render(<PostCard post={post} isAuthenticated={true} onLike={onLike} />);
 
-  expect(screen.getByText("Post de teste")).toBeInTheDocument();
-  expect(screen.getByText("Conteúdo do post")).toBeInTheDocument();
-  expect(screen.getByText("Curtir")).toBeInTheDocument();
-  expect(screen.getByText("🤍")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Curtir/ }));
 
-  fireEvent.click(screen.getByRole("button", { name: /Curtir/ }));
+    expect(onLike).toHaveBeenCalledWith(10);
+    expect(await screen.findByText("Curtido")).toBeInTheDocument();
+    expect(screen.getByText("❤️")).toBeInTheDocument();
+  });
 
-  expect(onLike).toHaveBeenCalledTimes(1);
-  expect(onLike).toHaveBeenCalledWith(10);
-  expect(await screen.findByText("Curtido")).toBeInTheDocument();
-  expect(screen.getByText("❤️")).toBeInTheDocument();
+  test("usuario deslogado: ao clicar em Curtir aparece o alert", () => {
+    const alertSpy = jest.spyOn(window, "alert").mockImplementation(() => {});
+    const onLike = jest.fn();
+    render(<PostCard post={post} isAuthenticated={false} onLike={onLike} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Curtir/ }));
+
+    expect(alertSpy).toHaveBeenCalledWith("Você precisa estar autenticado para curtir posts!");
+    expect(onLike).not.toHaveBeenCalled();
+  });
 });

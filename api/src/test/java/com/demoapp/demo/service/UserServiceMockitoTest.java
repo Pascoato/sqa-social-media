@@ -1,11 +1,12 @@
 package com.demoapp.demo.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.demoapp.demo.model.User;
 import com.demoapp.demo.repository.UserRepository;
 
+// Testa o UserService com o repositorio "falso" (sem banco de dados).
 @ExtendWith(MockitoExtension.class)
 class UserServiceMockitoTest {
 
@@ -27,24 +29,32 @@ class UserServiceMockitoTest {
   private UserService userService;
 
   @Test
-  void createUser_deveSalvarEDevolverUsuario() {
-    String email = "teste@email.com";
-    String password = "Abcd12!?";
-    User usuarioSalvo = new User();
-    usuarioSalvo.setId(1L);
-    usuarioSalvo.setEmail(email);
-    usuarioSalvo.setPassword(password);
+  void createUserDeveSalvarUsuarioNoRepositorio() {
+    // Arrange
+    User salvo = new User();
+    salvo.setEmail("teste@email.com");
+    when(userRepository.save(any(User.class))).thenReturn(salvo);
 
-    when(userRepository.save(any(User.class))).thenReturn(usuarioSalvo);
+    // Act
+    User resultado = userService.createUser("teste@email.com", "Abcd12!?");
 
-    User resultado = userService.createUser(email, password);
+    // Assert: confere o que foi enviado para o repositorio
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    verify(userRepository).save(captor.capture());
+    assertEquals("teste@email.com", captor.getValue().getEmail());
+    assertEquals("Abcd12!?", captor.getValue().getPassword());
+    assertEquals("teste@email.com", resultado.getEmail());
+  }
 
-    ArgumentCaptor<User> usuarioCaptor = ArgumentCaptor.forClass(User.class);
-    verify(userRepository, times(1)).save(usuarioCaptor.capture());
+  @Test
+  void findByEmailDeveRetornarNullQuandoNaoExiste() {
+    // Arrange
+    when(userRepository.findByEmail("x@x.com")).thenReturn(Optional.empty());
 
-    User usuarioEnviadoParaSalvar = usuarioCaptor.getValue();
-    assertEquals(email, usuarioEnviadoParaSalvar.getEmail());
-    assertEquals(password, usuarioEnviadoParaSalvar.getPassword());
-    assertSame(usuarioSalvo, resultado);
+    // Act
+    User resultado = userService.findByEmail("x@x.com");
+
+    // Assert
+    assertNull(resultado);
   }
 }

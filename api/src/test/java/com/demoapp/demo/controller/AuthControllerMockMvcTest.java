@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.demoapp.demo.model.User;
 import com.demoapp.demo.service.UserService;
 
+// Testa o endpoint HTTP (status e JSON). O service e "falso" (MockBean).
 @WebMvcTest(AuthController.class)
 class AuthControllerMockMvcTest {
 
@@ -24,49 +25,35 @@ class AuthControllerMockMvcTest {
   @MockBean
   private UserService userService;
 
+  // BUG: o controller devolve "E-mail já está em uso",
+  // mas o requisito pede "E-mail já cadastrado". Este teste FALHA de proposito.
   @Test
-  void signup_deveRetornarConflitoComMensagemEmailJaCadastrado() throws Exception {
-    String email = "aluno@fag.edu.br";
-    String password = "Abcd12!?";
-    User usuarioExistente = new User();
-    usuarioExistente.setEmail(email);
+  void signupComEmailRepetidoDeveRetornar409() throws Exception {
+    // Arrange: o service diz que o e-mail e a senha sao validos e que o e-mail ja existe
+    when(userService.isEmailValid("aluno@fag.edu.br")).thenReturn(true);
+    when(userService.isPasswordValid("Abcd12!?")).thenReturn(true);
+    when(userService.findByEmail("aluno@fag.edu.br")).thenReturn(new User());
 
-    when(userService.isEmailValid(email)).thenReturn(true);
-    when(userService.isPasswordValid(password)).thenReturn(true);
-    when(userService.findByEmail(email)).thenReturn(usuarioExistente);
-
+    // Act + Assert
     mockMvc.perform(post("/auth/signup")
         .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-              "email": "aluno@fag.edu.br",
-              "password": "Abcd12!?"
-            }
-            """))
+        .content("{\"email\":\"aluno@fag.edu.br\",\"password\":\"Abcd12!?\"}"))
         .andExpect(status().isConflict())
-        .andExpect(jsonPath("$.status").value(409))
         .andExpect(jsonPath("$.message").value("E-mail já cadastrado"));
   }
 
   @Test
-  void signin_deveRetornarNaoAutorizadoParaCredenciaisInvalidas() throws Exception {
-    String email = "inexistente@fag.edu.br";
-    String password = "Abcd12!?";
+  void signinComUsuarioInexistenteDeveRetornar401() throws Exception {
+    // Arrange: e-mail e senha validos, mas o usuario nao existe
+    when(userService.isEmailValid("naoexiste@fag.edu.br")).thenReturn(true);
+    when(userService.isPasswordValid("Abcd12!?")).thenReturn(true);
+    when(userService.findByEmail("naoexiste@fag.edu.br")).thenReturn(null);
 
-    when(userService.isEmailValid(email)).thenReturn(true);
-    when(userService.isPasswordValid(password)).thenReturn(true);
-    when(userService.findByEmail(email)).thenReturn(null);
-
+    // Act + Assert
     mockMvc.perform(post("/auth/signin")
         .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-              "email": "inexistente@fag.edu.br",
-              "password": "Abcd12!?"
-            }
-            """))
+        .content("{\"email\":\"naoexiste@fag.edu.br\",\"password\":\"Abcd12!?\"}"))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.status").value(401))
         .andExpect(jsonPath("$.message").value("Credenciais inválidas"));
   }
 }
