@@ -46,4 +46,4 @@ export interface LikedPostsResponse {
   posts: Post[];
   total: number;
   limit: number;
-}
+}
