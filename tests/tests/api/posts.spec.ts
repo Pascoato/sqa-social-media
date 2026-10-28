@@ -17,6 +17,20 @@ test.describe('API - posts', () => {
     expect(corpo.posts[0].liked).toBe(false); // sem usuario logado, nada vem curtido
   });
 
+  // Requisito coberto: cada post traz o objeto reactions do DummyJSON com likes e dislikes
+  test('GET /posts retorna reactions com likes e dislikes em cada post', async () => {
+    const api = await request.newContext({ baseURL: API_URL });
+
+    const resposta = await api.get('/posts', { params: { limit: 5, skip: 0 } });
+
+    expect(resposta.status()).toBe(200);
+    const corpo = await resposta.json();
+    for (const post of corpo.posts) {
+      expect(typeof post.reactions.likes).toBe('number');
+      expect(typeof post.reactions.dislikes).toBe('number');
+    }
+  });
+
   // Requisito coberto: curtir e descurtir um post (o mesmo endpoint alterna)
   test('POST /posts/{id}/like curte e descurte o post (alterna)', async () => {
     const api = await request.newContext({ baseURL: API_URL });
