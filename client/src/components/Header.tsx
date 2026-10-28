@@ -73,7 +73,7 @@ export default function Header() {
                 onClick={() => router.push("/signup")}
                 style={{ padding: "0.5rem 1rem" }}
               >
-                Criar Conta
+                Criar conta
               </Button>
             </>
           )}

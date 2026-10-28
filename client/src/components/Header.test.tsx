@@ -13,8 +13,7 @@ jest.mock("@/contexts/AuthContext", () => ({
 }));
 
 describe("Header", () => {
-  // BUG: o botao no codigo esta como "Criar Conta" (C maiusculo),
-  // mas o requisito diz "Criar conta". Este teste FALHA de proposito.
+  // O requisito diz "Criar conta" (c minusculo). O botao estava como "Criar Conta".
   test("usuario deslogado ve os botoes Entrar e Criar conta", () => {
     mockUseAuth.mockReturnValue({ isAuthenticated: false, logout: jest.fn() });
 
