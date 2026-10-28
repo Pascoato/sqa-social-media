@@ -24,4 +24,24 @@ class UserServiceTest {
 
     assertFalse(resultado);
   }
+
+  @Test
+  void senhaComSeteCaracteresDeveSerRejeitada() {
+    assertFalse(userService.isPasswordValid("Abcd12!"));
+  }
+
+  @Test
+  void senhaSemMinusculaDeveSerRejeitada() {
+    assertFalse(userService.isPasswordValid("ABCD12!?"));
+  }
+
+  @Test
+  void senhaSemNumeroDeveSerRejeitada() {
+    assertFalse(userService.isPasswordValid("Abcdef!?"));
+  }
+
+  @Test
+  void senhaSemCaractereEspecialDeveSerRejeitada() {
+    assertFalse(userService.isPasswordValid("Abcd1234"));
+  }
 }
